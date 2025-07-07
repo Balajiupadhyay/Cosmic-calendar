@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Calendar - Minimalist</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Space Mono', monospace;
+            background: #000000;
+            color: #ffffff;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .star {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            background: #ffffff;
+            opacity: 0.3;
+            animation: twinkle 6s infinite;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.1; }
+            50% { opacity: 0.8; }
+        }
+        
+        .container {
+            position: relative;
+            z-index: 2;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 80px;
+            padding: 60px 0;
+            border-bottom: 1px solid #333;
+        }
+        
+        .main-title {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(3rem, 6vw, 5rem);
+            font-weight: 900;
+            color: #ffffff;
+            letter-spacing: 0.1em;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+        
+        .subtitle {
+            font-size: clamp(1rem, 2vw, 1.3rem);
+            color: #888;
+            font-weight: 400;
+            margin-bottom: 40px;
+            letter-spacing: 0.05em;
+        }
+        
+        .scale-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .scale-item {
+            text-align: center;
+            padding: 20px;
+            border: 1px solid #333;
+            background: rgba(255, 255, 255, 0.02);
+            transition: all 0.3s ease;
+        }
+        
+        .scale-item:hover {
+            border-color: #666;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .scale-number {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 5px;
+        }
+        
+        .scale-desc {
+            font-size: 0.9em;
+            color: #aaa;
+        }
+        
+        .timeline {
+            margin: 80px 0;
+            position: relative;
+        }
+        
+        .timeline-line {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 100%;
+            background: linear-gradient(to bottom, #ffffff, #666, #333);
+            opacity: 0.3;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+            margin-bottom: 80px;
+        }
+        
+        .month-block {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid #333;
+            padding: 30px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .month-block:hover {
+            border-color: #666;
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-5px);
+        }
+        
+        .month-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #222;
+        }
+        
+        .month-icon {
+            font-size: 2.5em;
+            margin-right: 20px;
+            opacity: 0.7;
+        }
+        
+        .month-info h3 {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .month-age {
+            font-size: 0.85em;
+            color: #666;
+            font-weight: 400;
+        }
+        
+        .events {
+            list-style: none;
+        }
+        
+        .event {
+            margin-bottom: 20px;
+            padding: 15px 0;
+            border-bottom: 1px solid #1a1a1a;
+            transition: all 0.3s ease;
+        }
+        
+        .event:hover {
+            padding-left: 20px;
+            border-left: 2px solid #666;
+        }
+        
+        .event:last-child {
+            border-bottom: none;
+        }
+        
+        .event-date {
+            font-family: 'Orbitron', monospace;
+            font-size: 0.8em;
+            color: #888;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        
+        .event-title {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 5px;
+        }
+        
+        .event-desc {
+            font-size: 0.9em;
+            color: #aaa;
+            line-height: 1.4;
+        }
+        
+        .december-special {
+            border-color: #666;
+            background: rgba(255, 255, 255, 0.08);
+        }
+        
+        .final-hour {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid #444;
+            padding: 50px;
+            margin: 80px 0;
+            text-align: center;
+        }
+        
+        .final-hour h2 {
+            font-family: 'Orbitron', monospace;
+            font-size: 2.5em;
+            font-weight: 900;
+            color: #ffffff;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        
+        .final-events {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+            text-align: left;
+        }
+        
+        .final-event {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid #333;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .final-event:hover {
+            border-color: #666;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .final-event-time {
+            font-family: 'Orbitron', monospace;
+            font-size: 0.9em;
+            color: #888;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+        
+        .final-event-title {
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 5px;
+        }
+        
+        .final-event-desc {
+            font-size: 0.85em;
+            color: #aaa;
+        }
+        
+        .now-moment {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid #666;
+            padding: 40px;
+            margin: 60px 0;
+            text-align: center;
+        }
+        
+        .now-moment h3 {
+            font-family: 'Orbitron', monospace;
+            font-size: 2em;
+            font-weight: 900;
+            color: #ffffff;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+        
+        .now-text {
+            font-size: 1.1em;
+            color: #ccc;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .quote-section {
+            text-align: center;
+            margin: 80px 0;
+            padding: 60px 20px;
+            border-top: 1px solid #333;
+            border-bottom: 1px solid #333;
+        }
+        
+        .quote {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.3em;
+            font-weight: 400;
+            color: #ffffff;
+            font-style: italic;
+            margin-bottom: 20px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+        
+        .quote-author {
+            font-size: 1em;
+            color: #888;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 100;
+        }
+        
+        .nav-btn {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #333;
+            color: #ffffff;
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8em;
+            text-transform: uppercase;
+        }
+        
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #666;
+        }
+        
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 2px;
+            background: #ffffff;
+            z-index: 1000;
+            transition: width 0.3s ease;
+        }
+        
+        @media (max-width: 768px) {
+            .calendar-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .scale-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .final-events {
+                grid-template-columns: 1fr;
+            }
+            
+            .navigation {
+                right: 20px;
+                bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="progress"></div>
+    <div class="stars" id="stars"></div>
+    
+    <div class="container">
+        <header class="header">
+            <h1 class="main-title">Cosmic Calendar</h1>
+            <p class="subtitle">13.8 billion years compressed into one year</p>
+            
+            <div class="scale-grid">
+                <div class="scale-item">
+                    <div class="scale-number">1 YEAR</div>
+                    <div class="scale-desc">13.8 billion years</div>
+                </div>
+                <div class="scale-item">
+                    <div class="scale-number">1 MONTH</div>
+                    <div class="scale-desc">1.15 billion years</div>
+                </div>
+                <div class="scale-item">
+                    <div class="scale-number">1 DAY</div>
+                    <div class="scale-desc">38 million years</div>
+                </div>
+                <div class="scale-item">
+                    <div class="scale-number">1 SECOND</div>
+                    <div class="scale-desc">438 years</div>
+                </div>
+            </div>
+        </header>
+        
+        <div class="timeline">
+            <div class="timeline-line"></div>
+            
+            <div class="calendar-grid">
+                <div class="month-block">
+                    <div class="month-header">
+                        <div class="month-icon">●</div>
+                        <div class="month-info">
+                            <h3>January</h3>
+                            <div class="month-age">13.8 - 12.65 billion years ago</div>
+                        </div>
+                    </div>
+                    <ul class="events">
+                        <li class="event">
+                            <div class="event-date">Jan 1, 00:00:00</div>
+                            <div class="event-title">Big Bang</div>
+                            <div class="event-desc">Universe begins. Space and time are born.</div>
+                        </li>
+                        <li class="event">
+                            <div class="event-date">Jan 1, 00:00:01</div>
+                            <div class="event-title">Cosmic Inflation</div>
+                            <div class="event-desc">Universe expands exponentially.</div>
+                        </li>
+                        <li class="event">
+                            <div class="event-date">Jan 10</div>
+                            <div class="event-title">First Nuclei</div>
+                            <div class="event-desc">Hydrogen and helium nuclei form.</div>
+                        </li>
+                        <li class="event">
+                            <div class="event-date">Jan 15</div>
+                            <div class="event-title">Transparency</div>
+                            <div class="event-desc">First atoms form. Light can travel freely.</div>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="month-block">
+                    <div class="month-header">
+                        <div class="month-icon">✦</div>
+                        <div class="month-info">
+                            <h3>February</h3>
+                            <div class="month-age">12.65 - 11.5 billion years ago</div>
+                        </div>
+                    </div>
+                    <ul class="events">
+                        <li class="event">
+                            <div class="event-date">Feb 1</div>
+                            <div class="event-title">First Stars</div>
+                            <div class="event-desc">Massive Population III stars ignite.</div>
+                        </li>
+                        <li class="event">
+                            <div class="event-date">Feb 15</div>
+                            <div class="event-title">Heavy Elements</div>
+                            <div class="event-desc">First supernovas create metals.</div>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="month-block">
+                    <div class="month-header">
+                        <div class="month-icon">◦</div>
+                        <div class="month-info">
+                            <h3>March - August</h3>
+                            <div class="month-age">11.5 - 5.75 billion years ago</div>
+                        </div>
+                    </div>
+                    <ul class="events">
+                        <li class="event">
+                            <div class="event-date">Spring</div>
+                            <div class="event-title">Galaxy Formation</div>
+                            <div class="event-desc">Dark matter halos collapse into galaxies.</div>
+                        </li>
+                        <li class="event">
+                            <div class="event-date">Summer</div>
+                            <div class="event-title">Second Generation Stars</div>
+                            <div class="event-desc">Metal-rich stars enable planet formation.</div>
+                        </li>
+                        <li class="event">
+                            <div class="event-date">Late August</div>
+                            <div class="event-title">Milky Way Forms</div>
+                            <div class="event-desc">Our galaxy takes shape.</div>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="month-block">
+                    <div class="month-header">
+                        <div class="month-icon">☉</div>
+                        <div class="month-info">
+                            <h3>September</h3>
+                            <div class="month-age">5.75 - 4.6 billion years ago</div>
+                        </div>
+                    </div>
+                    <ul class="events">
+                        <li class="event">
+                            <div class="event-date">Sep 2</div>
+                            <div class="event-title">Sun Forms</div>
+                            <div class="event-desc">Our star is born from gas and dust.</div>
+                        </li>
+                        <li class="event">
+                            <div class="event-date">Sep 6</div>
+                            <div class="event-title">Earth Forms</div>
+                            <div class="event-desc">Planets coalesce from solar nebula.</div>
+                        </li>
+                        <li class="event">
+                            <div class="event-date">Sep 21</div>
+                            <div class="event-title">First Life</div>
+                            <div class="event-desc">Simple bacteria appear in oceans.</div>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="month-block">
+                    <div class="month-header">
+                        <div class="month-icon">◉</div>
+                        <div class="month-info">
+                            <h3>October - November</h3>
+                            <div class="month-age">4.6 - 2.3 billion years ago</div>
+                        </div>
+                    </div>
+                    <ul class="events">
+                        <li class="event">
+                            <div class="event-date">Oct 29</div>
+                            <div class="event-title">Photosynthesis</div>
+                            <div class="event-desc">Cyanobacteria produce oxygen.</div>
+                        </li>
+                        <li class="event">
+                            <div class="event-date">Nov 9</div>
+                            <div class="event-title">Complex Cells</div>
+                            <div class="event-desc">Eukaryotic cells with nuclei evolve.</div>
+                        </li>
+                        <li class="event">
+                            <div class="event-date">Nov 12</div>
+                            <div class="event-title">Ozone Layer</div>
+                            <div class="event-desc">Protective atmosphere forms.</div>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="month-block december-special">
+                    <div class="month-header">
+                        <div class="month-icon">❋</div>
+                        <div class="month-info">
+                            <h3>December</h3>
+                            <div class="month-age">2.3 billion years ago - Present</div>
+                        </div>
+                    </div>
+                    <ul class="events">
+                        <li class="event">
+                            <div class="event-date">Dec 5</div>
+                            <div class="event-title">Multicellular Life</div>
+                            <div class="event-desc">Cells cooperate to form organisms.</div>
+                        </li>
+                        <li class="event">
+                            <div class="event-date">Dec 17</div>
+                            <div class="event-title">Cambrian Explosion</div>
+                            <div class="event-desc">Complex life forms diversify rapidly.</div>
+                        </li>
+                        <li class="event">
+                            <div class="event-date">Dec 20</div>
+                            <div class="event-title">Vertebrates</div>
+                            <div class="event-desc">First fish with backbones.</div>
+                        </li>
+                        <li class="event">
+                            <div class="event-date">Dec 21</div>
+                            <div class="event-title">Land Plants</div>
+                            <div class="event-desc">Life colonizes terrestrial environments.</div>
+                        </li>
+                        <li class="event">
+                            <div class="event-date">Dec 22</div>
+                            <div class="event-title">Insects & Amphibians</div>
+                            <div class="event-desc">Flight and land-water transitions.</div>
+                        </li>
+                        <li class="event">
+                            <div class="event-date">Dec 23</div>
+                            <div class="event-title">Forests & Reptiles</div>
+                            <div class="event-desc">Trees cover land, reptiles evolve.</div>
+                        </li>
+                        <li class="event">
+                            <div class="event-date">Dec 24</div>
+                            <div class="event-title">Flowering Plants</div>
+                            <div class="event-desc">Angiosperms revolutionize ecosystems.</div>
+                        </li>
+                        <li class="event">
+                            <div class="event-date">Dec 25</div>
+                            <div class="event-title">Mammals</div>
+                            <div class="event-desc">Warm-blooded, milk-producing animals.</div>
+                        </li>
+                        <li class="event">
+                            <div class="event-date">Dec 26</div>
+                            <div class="event-title">Dinosaur Extinction</div>
+                            <div class="event-desc">Asteroid impact ends Mesozoic Era.</div>
+                        </li>
+                        <li class="event">
+                            <div class="event-date">Dec 28</div>
+                            <div class="event-title">Primates</div>
+                            <div class="event-desc">Our earliest ancestors appear.</div>
+                        </li>
+                        <li class="event">
+                            <div class="event-date">Dec 30</div>
+                            <div class="event-title">Homo Sapiens</div>
+                            <div class="event-desc">Modern humans evolve in Africa.</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="final-hour">
+            <h2>Final Hour</h2>
+            <p>December 31st, 23:00 - 00:00</p>
+            
+            <div class="final-events">
+                <div class="final-event">
+                    <div class="final-event-time">23:58</div>
+                    <div class="final-event-title">Ice Age Ends</div>
+                    <div class="final-event-desc">Last glacial period concludes</div>
+                </div>
+                <div class="final-event">
+                    <div class="final-event-time">23:59:20</div>
+                    <div class="final-event-title">Agriculture</div>
+                    <div class="final-event-desc">Humans begin farming</div>
+                </div>
+                <div class="final-event">
+                    <div class="final-event-time">23:59:35</div>
+                    <div class="final-event-title">Cities</div>
+                    <div class="final-event-desc">First urban civilizations</div>
+                </div>
+                <div class="final-event">
+                    <div class="final-event-time">23:59:50</div>
+                    <div class="final-event-title">Ancient Empires</div>
+                    <div class="final-event-desc">Egypt, Mesopotamia, Greece</div>
+                </div>
+                <div class="final-event">
+                    <div class="final-event-time">23:59:55</div>
+                    <div class="final-event-title">Roman Empire</div>
+                    <div class="final-event-desc">Classical antiquity peaks</div>
+                </div>
+                <div class="final-event">
+                    <div class="final-event-time">23:59:58</div>
+                    <div class="final-event-title">Renaissance</div>
+                    <div class="final-event-desc">Scientific revolution begins</div>
+                </div>
+                <div class="final-event">
+                    <div class="final-event-time">23:59:59</div>
+                    <div class="final-event-title">Industrial Age</div>
+                    <div class="final-event-desc">Steam, electricity, modern tech</div>
+                </div>
+                <div class="final-event">
+                    <div class="final-event-time">23:59:59.9</div>
+                    <div class="final-event-title">Space Age</div>
+                    <div class="final-event-desc">Computers, internet, exploration</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="now-moment">
+            <h3>00:00:00</h3>
+            <p class="now-text">
+                Right now. This moment. All of recorded human history occupies the final 10 seconds 
+                of this cosmic year. Every breath you take represents thousands of years on this scale.
+            </p>
+        </div>
+        
+        <div class="quote-section">
+            <div class="quote">
+                "The cosmos is within us. We are made of star-stuff. 
+                We are a way for the universe to know itself."
+            </div>
+            <div class="quote-author">— Carl Sagan</div>
+        </div>
+    </div>
+    
+    <div class="navigation">
+        <button class="nav-btn" onclick="scrollToTop()">↑ Top</button>
+        <button class="nav-btn" onclick="scrollToDecember()">December</button>
+        <button class="nav-btn" onclick="scrollToFinal()">Final Hour</button>
+    </div>
+    
+    <script>
+        // Minimal star field
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            const numStars = 100;
+            
+            for (let i = 0; i < numStars; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 6 + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+        
+        // Scroll progress bar
+        function updateProgress() {
+            const scrollTop = window.pageYOffset;
+            const docHeight = document.body.scrollHeight - window.innerHeight;
+            const scrollPercent = (scrollTop / docHeight) * 100;
+            document.getElementById('progress').style.width = scrollPercent + '%';
+        }
+        
+        // Navigation functions
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        function scrollToDecember() {
+            document.querySelector('.december-special').scrollIntoView({ 
+                behavior: 'smooth', block: 'start' 
+            });
+        }
+        
+        function scrollToFinal() {
+            document.querySelector('.final-hour').scrollIntoView({ 
+                behavior: 'smooth', block: 'start' 
+            });
+        }
+        
+        // Smooth reveal animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            createStars();
+            
+            // Set up scroll progress
+            window.addEventListener('scroll', updateProgress);
+            
+            // Set up reveal animations
+            document.querySelectorAll('.month-block').forEach(block => {
+                block.style.opacity = '0';
+                block.style.transform = 'translateY(30px)';
+                block.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(block);
+            });
+        });
+    </script>
+</body>
+</html>
